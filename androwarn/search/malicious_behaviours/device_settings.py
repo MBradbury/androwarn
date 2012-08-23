@@ -69,18 +69,21 @@ def detect_get_package_info(x) :
 	structural_analysis_results = x.tainted_packages.search_methods("Landroid/content/pm/PackageManager","getPackageInfo", ".")
 	
 	for result in xrange(len(structural_analysis_results)) :
-		registers = data_flow_analysis(structural_analysis_results, result, x)		
+		try:
+			registers = data_flow_analysis(structural_analysis_results, result, x)		
 
-		if len(registers) >= 2 :
-			package_name = get_register_value(1, registers)
-			flag = get_register_value(2, registers)
+			if len(registers) >= 2 :
+				package_name = get_register_value(1, registers)
+				flag = get_register_value(2, registers)
 			
-			# Recover OR bitwise options set from the integer value, for instance 'GET_ACTIVITIES | GET_RECEIVERS'
-			flags = recover_bitwise_flag_settings(flag, PackageManager_PackageInfo)
+				# Recover OR bitwise options set from the integer value, for instance 'GET_ACTIVITIES | GET_RECEIVERS'
+				flags = recover_bitwise_flag_settings(flag, PackageManager_PackageInfo)
 			
-			local_formatted_str = "This application retrieves '%s' information about the '%s' application installed on the system" % (flags, package_name)
-			if not(local_formatted_str in formatted_str) :
-				formatted_str.append(local_formatted_str)
+				local_formatted_str = "This application retrieves '%s' information about the '%s' application installed on the system" % (flags, package_name)
+				if not(local_formatted_str in formatted_str) :
+					formatted_str.append(local_formatted_str)
+		except:
+			pass
 	
 	return formatted_str
 
